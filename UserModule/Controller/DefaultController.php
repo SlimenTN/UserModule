@@ -104,18 +104,36 @@ class DefaultController extends AppController
 
         $user = $this->connectedUser();
         $user = $this->repository->find($user->getId());
+        $oldPassword = $user->getPassword();
 
         $form = $this->buildForm('User:UserUpdate', $user);
 
+        $message = null;
         if($form->isPosted()){
             $data = $form->getData();
-            var_dump($data);
-            var_dump($user);
-            die();
+            $confirmationPassword = $this->cryptPassword($data['oldPassword']);
+           if($confirmationPassword != $oldPassword){
+               $message = 'The confirmation password does not match with the user\'s password. Please check it and retry again.';
+           }else{
+               if($user->getPassword() == ''){
+                   $user->setPassword($oldPassword);
+               }else{
+                   $user->setPassword($this->cryptPassword($user->getPassword()));
+               }
+               $em = $this->getEntityManager();
+
+               $em->persist($user);
+               $em->flush();
+
+               $this->session()->push('user', $user);//---push updated user to the session
+
+               $message = 'The user has been successfully update.';
+           }
         }
 
         $this->paintView('User:profile.html.twig', array(
             'form' => $form,
+            'message' => $message,
         ));
 
     }
