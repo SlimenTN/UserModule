@@ -97,6 +97,7 @@ class DefaultController extends AppController
     }
 
     /**
+     * Profile command
      * @throws \Exception
      */
     public function profileCommand(){
@@ -113,7 +114,7 @@ class DefaultController extends AppController
             $data = $form->getData();
             $confirmationPassword = $this->cryptPassword($data['oldPassword']);
            if($confirmationPassword != $oldPassword){
-               $message = 'The confirmation password does not match with the user\'s password. Please check it and retry again.';
+               $message = 'The confirmation password does not match with the connected user\'s password. Please check it and retry again.';
            }else{
                if($user->getPassword() == ''){
                    $user->setPassword($oldPassword);
@@ -136,6 +137,52 @@ class DefaultController extends AppController
             'message' => $message,
         ));
 
+    }
+
+    /**
+     * Edit user
+     * @param $id
+     * @throws RuntimeException
+     * @throws \Exception
+     */
+    public function editUserCommand($id){
+        $this->call('user.secure.command');
+
+        $user = $this->repository->find($id);
+
+        $oldPassword = $user->getPassword();
+
+        $connectedUserPassword = $this->connectedUser()->getPassword();
+
+        $form = $this->buildForm('User:UserUpdate', $user);
+
+        $message = null;
+        if($form->isPosted()){
+            $data = $form->getData();
+            $confirmationPassword = $this->cryptPassword($data['oldPassword']);
+            if($confirmationPassword != $connectedUserPassword){
+                $message = 'The confirmation password does not match with the connected user\'s password. Please check it and retry again.';
+            }else{
+                if($user->getPassword() == ''){
+                    $user->setPassword($oldPassword);
+                }else{
+                    $user->setPassword($this->cryptPassword($user->getPassword()));
+                }
+                $em = $this->getEntityManager();
+
+                $em->persist($user);
+                $em->flush();
+
+                $this->session()->push('user', $user);//---push updated user to the session
+
+                $message = 'The user has been successfully update.';
+            }
+        }
+
+        $this->paintView('User:profile.html.twig', array(
+            'form' => $form,
+            'message' => $message,
+        ));
     }
 
     /**

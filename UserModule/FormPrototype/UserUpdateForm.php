@@ -12,7 +12,7 @@ class UserUpdateForm extends UserForm
         $builder->removeInput('password');
         $builder
             ->addInput('password', 'password', 'New password')
-            ->addInput('oldPassword', 'password', 'Old password', array(
+            ->addInput('oldPassword', 'password', 'Confirmation password', array(
                 'required' => true,
             ))
         ;

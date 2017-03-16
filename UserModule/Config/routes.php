@@ -21,4 +21,8 @@ return [
         'pattern' => '/profile',
         'command' => 'User_Default:profile',
     ],
+    'edit_user' => [
+        'pattern' => '/user/%id/edit',
+        'command' => 'User_Default:editUser',
+    ],
 ];
