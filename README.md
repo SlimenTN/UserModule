@@ -13,15 +13,15 @@ A module to manage users for Limpid
         ]
     ],</pre>
     
-This service secure your commands form visitors (only connected user can access this command), what you need to do is to call this service whenever you want to secure a command:
-
+This service secure your commands form visitors (only connected user can access this command), what you need to do is to call this service whenever you want to secure a command:<br>
+<strong>the function `call()` is available only in the last version of Limpid, so make sure to have it :)</strong>
     
     public function indexCommand(){
         $this->call('user.secure.command');
         
         echo 'You can access this command');
     }
- 
+    
 The UserModule will check if the user is connected then it will give him access to this command otherwise the visitor will be redirected to the login page.
 
 4- In the UserModule directory you will find a configuration file under `UserModule/Config` named `module_configuration.php` where you can set the default route after user is logged in and the encryption methode that you want to use.
